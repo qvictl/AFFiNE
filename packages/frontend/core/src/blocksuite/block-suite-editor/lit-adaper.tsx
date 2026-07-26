@@ -52,6 +52,7 @@ import { DocIconPicker } from './doc-icon-picker';
 import { BlocksuiteEditorJournalDocTitle } from './journal-doc-title';
 import { StarterBar } from './starter-bar';
 import * as styles from './styles.css';
+import { SubpagePanel } from './subpage-panel';
 
 interface BlocksuiteEditorProps {
   page: Store;
@@ -291,7 +292,10 @@ export const BlocksuiteDocEditor = forwardRef<
           <StarterBar doc={page} />
         )}
         {!shared && displayBiDirectionalLink ? (
-          <BiDirectionalLinkPanel />
+          <>
+            <SubpagePanel />
+            <BiDirectionalLinkPanel />
+          </>
         ) : null}
       </div>
       {portals}

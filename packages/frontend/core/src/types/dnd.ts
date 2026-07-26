@@ -38,6 +38,10 @@ export interface AffineDNDData extends DNDData {
           docId: string;
         }
       | {
+          at: 'navigation-panel:doc-tree:node';
+          docId: string;
+        }
+      | {
           at: 'navigation-panel:collection:filtered-docs';
           collectionId: string;
         }

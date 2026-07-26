@@ -4770,6 +4770,34 @@ export function useAFFiNEI18N(): {
       */
     ["com.affine.rootAppSidebar.doc.link-doc-only"](): string;
     /**
+      * `Pages`
+      */
+    ["com.affine.rootAppSidebar.docTree"](): string;
+    /**
+      * `New subpage`
+      */
+    ["com.affine.rootAppSidebar.docTree.add-subpage"](): string;
+    /**
+      * `New page`
+      */
+    ["com.affine.rootAppSidebar.docTree.add-tooltip"](): string;
+    /**
+      * `Only docs can be moved into the page tree`
+      */
+    ["com.affine.rootAppSidebar.docTree.doc-only"](): string;
+    /**
+      * `No pages yet. Click to create one.`
+      */
+    ["com.affine.rootAppSidebar.docTree.empty"](): string;
+    /**
+      * `Move to root`
+      */
+    ["com.affine.rootAppSidebar.docTree.move-to-root"](): string;
+    /**
+      * `Subpages`
+      */
+    ["com.affine.docTree.subpages"](): string;
+    /**
       * `No linked docs`
       */
     ["com.affine.rootAppSidebar.docs.no-subdoc"](): string;

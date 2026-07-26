@@ -25,6 +25,7 @@ import { configureDocDisplayMetaModule } from './doc-display-meta';
 import { configureDocInfoModule } from './doc-info';
 import { configureDocLinksModule } from './doc-link';
 import { configureDocSummaryModule } from './doc-summary';
+import { configureDocTreeModule } from './doc-tree';
 import { configureDocsSearchModule } from './docs-search';
 import { configureEditorModule } from './editor';
 import { configureEditorSettingModule } from './editor-setting';
@@ -74,6 +75,7 @@ export function configureCommonModules(framework: Framework) {
   configureI18nModule(framework);
   configureWorkspaceModule(framework);
   configureDocModule(framework);
+  configureDocTreeModule(framework);
   configureWorkspaceDBModule(framework);
   configureStorageModule(framework);
   configureGlobalContextModule(framework);

@@ -20,6 +20,12 @@ export const AFFiNE_WORKSPACE_DB_SCHEMA = {
     type: f.string(),
     index: f.string(),
   },
+  docTree: {
+    // doc id as primary key; each doc appears at most once (strict tree)
+    id: f.string().primaryKey(),
+    parentId: f.string().optional(),
+    index: f.string().optional(),
+  },
   docProperties: t.document({
     // { [`custom:{customPropertyId}`]: any }
     id: f.string().primaryKey(),
@@ -58,6 +64,7 @@ export const AFFiNE_WORKSPACE_DB_SCHEMA = {
 export type AFFiNEWorkspaceDbSchema = typeof AFFiNE_WORKSPACE_DB_SCHEMA;
 
 export type DocProperties = ORMEntity<AFFiNEWorkspaceDbSchema['docProperties']>;
+export type DocTreeRecord = ORMEntity<AFFiNEWorkspaceDbSchema['docTree']>;
 export type DocCustomPropertyInfo = ORMEntity<
   AFFiNEWorkspaceDbSchema['docCustomPropertyInfo']
 >;
