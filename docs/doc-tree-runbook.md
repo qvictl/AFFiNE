@@ -66,6 +66,22 @@ yarn dev                   # 前端 web
 
 ## 3. 构建并发布镜像
 
+### 方式 A：GitHub Actions（推荐，CI/CD）
+
+fork 自带 `.github/workflows/fork-build-image.yml`：
+
+- **触发**：push 到 `feat/doc-tree` 自动构建；Actions 页面也可手动 Run（可指定额外 tag）
+- **产物**：推送到 GHCR `ghcr.io/qvictl/affine:<分支名>-<short-sha>`（外加 `:feat-doc-tree` 滚动 tag 和手动指定的 tag）
+- **无需任何 secret**：GITHUB_TOKEN 自动完成 GHCR 登录；Sentry/R2/PRO key 全部跳过
+- 单 job、单架构（linux/amd64），yarn + rust + docker layer 三级缓存
+
+首次使用：
+
+1. fork 的 Settings → Actions → 启用 workflows（fork 默认关闭）
+2. 首次推送后，GHCR 包默认是 **private**：到 https://github.com/users/qvictl/packages 把 `affine` 改成 public（或 NAS 上 `docker login ghcr.io` 用 read:packages 的 PAT 拉私有包）
+
+### 方式 B：本机构建（scripts/build-local-image.sh）
+
 ```sh
 # 本地构建（单架构 linux/amd64，tag 默认 doc-tree-<short-sha>）
 scripts/build-local-image.sh
@@ -86,15 +102,19 @@ REGISTRY=registry.example.com/affine TAG=v0.27.0-doc-tree.1 PLATFORM=linux/amd64
 
 ## 4. 服务器部署（self-host）
 
-服务器上准备 `.docker/selfhost/compose.yml` 的副本（见仓库 `.docker/selfhost/`），把 image 改成自建镜像：
+服务器上准备 `.docker/selfhost/compose.yml` 的副本（见仓库 `.docker/selfhost/`），把 image 改成 GHCR 镜像：
 
 ```yaml
 services:
   affine:
-    image: registry.example.com/affine:v0.27.0-doc-tree.1
+    image: ghcr.io/qvictl/affine:feat-doc-tree
   affine_migration:
-    image: registry.example.com/affine:v0.27.0-doc-tree.1
+    image: ghcr.io/qvictl/affine:feat-doc-tree
 ```
+
+NAS 上（按 /mnt/user/appdata/AFFiNE 的部署约定）：把 start.sh 里的镜像名从
+`ghcr.io/toeverything/affine` 换成 `ghcr.io/qvictl/affine`，`AFFINE_REVISION`
+用 CI 产出的 tag。
 
 并按 `.docker/selfhost/config.example.json` 准备配置后：
 

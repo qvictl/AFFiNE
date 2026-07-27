@@ -1,0 +1,152 @@
+name: Fork Build Image
+
+# Builds the AFFiNE all-in-one docker image for this fork and pushes it to
+# GHCR (ghcr.io/<owner>/affine). Mirrors .github/workflows/build-images.yml
+# but: single job, single arch (linux/amd64), no secrets required
+# (Sentry/R2/PRO keys are all skipped), GHCR auth via GITHUB_TOKEN.
+#
+# Triggers:
+#   - push to the branches below (e.g. feat/doc-tree)
+#   - manual: Actions -> "Fork Build Image" -> Run workflow (optional tag)
+#
+# First-time setup:
+#   1. fork Settings -> Actions -> enable workflows
+#   2. after the first push, make the package public:
+#      github.com/users/<you>/packages -> affine -> Settings -> Change visibility
+#      (or pull on the NAS with `docker login ghcr.io` + a read:packages PAT)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'extra image tag (e.g. v0.27.0-doc-tree.1)'
+        required: false
+        default: ''
+  push:
+    branches:
+      - feat/doc-tree
+    paths:
+      - 'packages/**'
+      - 'blocksuite/**'
+      - 'tools/**'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/deployment/**'
+      - '.github/workflows/fork-build-image.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  BUILD_TYPE: stable
+  IMAGE: ghcr.io/${{ github.repository_owner }}/affine
+
+jobs:
+  build-image:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build @affine/web
+        run: yarn affine @affine/web build
+
+      - name: Build @affine/admin
+        run: yarn affine @affine/admin build
+
+      - name: Build @affine/mobile
+        run: yarn affine @affine/mobile build
+
+      - name: Read rust toolchain version
+        id: rustup-version
+        run: |
+          V="$(grep 'channel' rust-toolchain.toml | head -1 | awk -F '\"' '{print $2}')"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '${{ steps.rustup-version.outputs.version }}'
+          targets: 'x86_64-unknown-linux-gnu'
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build server-native
+        run: yarn affine @affine/server-native build
+
+      - name: Rename native artifact
+        run: |
+          mv ./packages/backend/native/server-native.node \
+            ./packages/backend/native/server-native.x64.node
+
+      - name: Build @affine/server
+        run: yarn workspace @affine/server build
+
+      - name: Install production dependencies for @affine/server
+        run: |
+          yarn config set --json supportedArchitectures.cpu '["x64"]'
+          yarn config set --json supportedArchitectures.libc '["glibc"]'
+          yarn workspaces focus @affine/server --production
+
+      - name: Generate Prisma client
+        run: yarn workspace @affine/server prisma generate
+
+      - name: Move node_modules into server package
+        run: mv ./node_modules ./packages/backend/server
+
+      - name: Compute tags
+        id: tags
+        run: |
+          SHA_TAG="$(echo "${{ github.ref_name }}" | tr '/.' '-')-$(git rev-parse --short HEAD)"
+          echo "sha_tag=$SHA_TAG" >> "$GITHUB_OUTPUT"
+          echo "tags<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$IMAGE:$SHA_TAG" >> "$GITHUB_OUTPUT"
+          echo "$IMAGE:$(echo "${{ github.ref_name }}" | tr '/.' '-')" >> "$GITHUB_OUTPUT"
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "$IMAGE:${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          file: .github/deployment/node/Dockerfile
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        run: |
+          echo "Image pushed:" >> "$GITHUB_STEP_SUMMARY"
+          echo '${{ steps.tags.outputs.tags }}' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deploy on the NAS: set image to one of the tags above in /mnt/user/appdata/AFFiNE/.env" >> "$GITHUB_STEP_SUMMARY"
