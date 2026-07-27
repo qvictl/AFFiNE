@@ -94,6 +94,13 @@ jobs:
         run: |
           mv ./packages/backend/native/server-native.node \
             ./packages/backend/native/server-native.x64.node
+          # rspack statically resolves all arch variants in
+          # packages/backend/native/index.js; stub the non-x64 ones (only
+          # ever require()'d on matching arch, which we don't ship)
+          cp ./packages/backend/native/server-native.x64.node \
+            ./packages/backend/native/server-native.arm64.node
+          cp ./packages/backend/native/server-native.x64.node \
+            ./packages/backend/native/server-native.armv7.node
 
       - name: Build @affine/server
         run: yarn workspace @affine/server build

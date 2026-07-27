@@ -62,6 +62,11 @@ if [ "${SKIP_SERVER:-0}" != "1" ]; then
   esac
   cp -f packages/backend/native/server-native.node \
     "packages/backend/native/$NATIVE_FILE"
+  # rspack statically resolves all arch variants in native/index.js;
+  # stub the other arch files so the server bundle builds
+  for f in server-native.x64.node server-native.arm64.node server-native.armv7.node; do
+    [ "$f" = "$NATIVE_FILE" ] || cp -f "packages/backend/native/$NATIVE_FILE" "packages/backend/native/$f"
+  done
 
   echo "==> building @affine/server"
   yarn workspace @affine/server build
