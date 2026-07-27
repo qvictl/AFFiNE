@@ -88,6 +88,10 @@ jobs:
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
+        with:
+          # namespace the cache by runner image: artifacts built on
+          # ubuntu-latest are incompatible with ubuntu-22.04
+          key: u2204
 
       - name: Build server-native
         run: yarn affine @affine/server-native build
