@@ -47,7 +47,9 @@ env:
 jobs:
   build-image:
     name: Build and push image
-    runs-on: ubuntu-latest
+    # ubuntu-22.04: the native module must link against a glibc older than
+    # the runtime image's (node:22-bookworm-slim = glibc 2.36)
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
 
