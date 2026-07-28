@@ -1188,6 +1188,8 @@
   "com.affine.rootAppSidebar.docTree.empty": "还没有页面，点击创建",
   "com.affine.rootAppSidebar.docTree.move-to-root": "移到根级",
   "com.affine.docTree.subpages": "子页面",
+  "com.affine.rootAppSidebar.doc.unlink": "取消链接",
+  "com.affine.rootAppSidebar.doc.unlinked": "已取消链接",
   "com.affine.rootAppSidebar.docs.no-subdoc": "没有链接文档",
   "com.affine.rootAppSidebar.docs.references-loading": "链接文档加载中...",
   "com.affine.rootAppSidebar.explorer.collection-add-tooltip": "新建文档",

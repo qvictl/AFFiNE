@@ -4797,6 +4797,13 @@ export function useAFFiNEI18N(): {
       * `Subpages`
       */
     ["com.affine.docTree.subpages"](): string;
+      * `Unlink`
+      */
+    ["com.affine.rootAppSidebar.doc.unlink"](): string;
+    /**
+      * `Unlinked`
+      */
+    ["com.affine.rootAppSidebar.doc.unlinked"](): string;
     /**
       * `No linked docs`
       */

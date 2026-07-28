@@ -1188,6 +1188,8 @@
   "com.affine.rootAppSidebar.docTree.empty": "No pages yet. Click to create one.",
   "com.affine.rootAppSidebar.docTree.move-to-root": "Move to root",
   "com.affine.docTree.subpages": "Subpages",
+  "com.affine.rootAppSidebar.doc.unlink": "Unlink",
+  "com.affine.rootAppSidebar.doc.unlinked": "Unlinked",
   "com.affine.rootAppSidebar.docs.no-subdoc": "No linked docs",
   "com.affine.rootAppSidebar.docs.references-loading": "Loading linked docs...",
   "com.affine.rootAppSidebar.explorer.collection-add-tooltip": "New doc",
